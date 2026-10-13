@@ -130,7 +130,7 @@
         .btn-toggle-edit { border-color: #555; color: #888; }
         body.editing-active .btn-toggle-edit { border-color: var(--hb-red); color: var(--hb-red); background: rgba(193, 18, 31, 0.12); }
 
-        /* 表格容器：增加 overflow-x 保证手机端可正常横向滚动 */
+        /* 表格容器 */
         .table-container {
             width: 100%; max-width: 1100px;
             background: rgba(15, 15, 15, 0.9); 
@@ -223,6 +223,13 @@
             font-size: 1em; line-height: 1.6; resize: none; margin-bottom: 15px; border-radius: 4px;
         }
         .noun-textarea:focus { outline: none; border-color: var(--hb-red); }
+
+        /* 密码输入框专用样式 */
+        .password-input {
+            text-align: center;
+            letter-spacing: 4px;
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
@@ -296,6 +303,19 @@
         </div>
     </div>
 
+    <!-- 密码验证模态框 (替代明文 prompt，输入自动遮掩为圆点/星号) -->
+    <div id="passwordModal" class="modal-overlay" onclick="closeModalOnOverlay(event, this)">
+        <div class="upload-panel" style="width: 360px;">
+            <h3 id="passwordModalTitle" style="color:var(--hb-gold); font-family:'Cinzel', serif; margin-top:0;">破狱者密语验证</h3>
+            <div id="passwordModalPrompt" style="color:var(--hb-steel); font-size: 0.9em; margin-bottom: 15px;">请输入密语：</div>
+            <input type="password" id="passwordModalInput" class="url-input password-input" placeholder="● ● ● ● ● ●" autocomplete="off" onkeydown="handlePasswordKey(event)">
+            <div style="display:flex; justify-content: center; gap:10px;">
+                <button class="btn" style="border-color:var(--hb-red); color:var(--hb-red);" onclick="confirmPassword()">验证通行</button>
+                <button class="btn" style="border-color:#555; color:#777;" onclick="cancelPassword()">撤退</button>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="fileInput" style="display:none" accept="image/*">
 
     <script>
@@ -304,7 +324,6 @@
         const API_KEY = '$2a$10$y8zzhvJgc6dFJB7rYbhP1eSAH4yZyI6hjqJheCSwTXr/NvJbtVIsC';
         const IMG_BB_KEY = '192ec7a9ecdec9b51ffed683da3842dc'; 
         const ACCESS_PASSWORD = '781674'; 
-        // 兜底默认占位图（内嵌 SVG，完全断网可用，不会触发死循环）
         const FALLBACK_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 55 55'%3E%3Crect width='55' height='55' fill='%231a1a1a'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23555' font-size='22'%3E%3F%3C/text%3E%3C/svg%3E";
         // ====================================
 
@@ -314,10 +333,11 @@
         let hasUnsavedChanges = false;
         let currentEditingIndex = -1;
         let statusTimeout = null;
+        let passwordResolver = null;
 
         window.onload = loadFromCloud;
 
-        // 安全转义函数，杜绝 XSS 与特殊字符破坏页面
+        // 安全转义函数
         function escapeHtml(str) {
             if (!str) return "";
             return String(str)
@@ -328,19 +348,60 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // 点击遮罩灰色背景直接关闭
+        // 遮罩点击关闭
         function closeModalOnOverlay(e, modalElement) {
             if (e.target === modalElement) {
-                modalElement.style.display = 'none';
+                if (modalElement.id === 'passwordModal') {
+                    cancelPassword();
+                } else {
+                    modalElement.style.display = 'none';
+                }
             }
         }
 
-        // 全局粘贴事件监听
+        // 自定义掩码密码输入弹窗
+        function askPassword(promptText = "请输入反抗密语:") {
+            return new Promise((resolve) => {
+                passwordResolver = resolve;
+                const modal = document.getElementById('passwordModal');
+                const input = document.getElementById('passwordModalInput');
+                document.getElementById('passwordModalPrompt').innerText = promptText;
+                input.value = '';
+                modal.style.display = 'flex';
+                setTimeout(() => input.focus(), 100);
+            });
+        }
+
+        function confirmPassword() {
+            const val = document.getElementById('passwordModalInput').value;
+            document.getElementById('passwordModal').style.display = 'none';
+            if (passwordResolver) {
+                passwordResolver(val);
+                passwordResolver = null;
+            }
+        }
+
+        function cancelPassword() {
+            document.getElementById('passwordModal').style.display = 'none';
+            if (passwordResolver) {
+                passwordResolver(null);
+                passwordResolver = null;
+            }
+        }
+
+        function handlePasswordKey(e) {
+            if (e.key === 'Enter') {
+                confirmPassword();
+            } else if (e.key === 'Escape') {
+                cancelPassword();
+            }
+        }
+
+        // 全局粘贴监听
         document.addEventListener('paste', function(e) {
             if (e.target.getAttribute('contenteditable')) {
                 e.preventDefault();
                 const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-                // 兼容性插入纯文本方式
                 const selection = window.getSelection();
                 if (!selection.rangeCount) return;
                 selection.deleteFromDocument();
@@ -387,9 +448,12 @@
             }
         }
 
-        function toggleEditMode() {
+        async function toggleEditMode() {
             if (!isEditMode) {
-                if (prompt("为防地狱骑士窃密，请输入反抗密语:") === ACCESS_PASSWORD) {
+                const inputPass = await askPassword("为防地狱骑士窃密，请输入反抗密语:");
+                if (inputPass === null) return; // 用户取消
+
+                if (inputPass === ACCESS_PASSWORD) {
                     isEditMode = true;
                     document.body.classList.add('editing-active');
                     document.getElementById('editToggleBtn').innerHTML = "👁 查阅模式";
@@ -432,9 +496,14 @@
         }
 
         async function saveToCloud() {
-            if (prompt("确认将机密情报封存入库？(输入密语):") !== ACCESS_PASSWORD) return;
+            const inputPass = await askPassword("确认将机密情报封存入库？请输入密语确认:");
+            if (inputPass === null) return;
+            if (inputPass !== ACCESS_PASSWORD) {
+                alert("验证失败：无权封存！");
+                return;
+            }
+
             showStatus("正在加密并传输数据...");
-            
             const payload = { npcs: npcData, nouns: nounRecords };
 
             try {
@@ -523,7 +592,7 @@
         function openUploadModal(index) {
             currentEditingIndex = index;
             document.getElementById('urlInput').value = '';
-            document.getElementById('fileInput').value = ''; // 解决重复选择同一张图片不触发的问题
+            document.getElementById('fileInput').value = '';
             document.getElementById('uploadModal').style.display = 'flex';
             setTimeout(() => document.getElementById('urlInput').focus(), 100);
         }
@@ -650,7 +719,7 @@
             };
             if (input.files[0]) {
                 reader.readAsText(input.files[0]);
-                input.value = ''; // 允许重复导入同一份修改过的文件
+                input.value = '';
             }
         }
 
