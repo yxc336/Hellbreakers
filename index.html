@@ -35,7 +35,7 @@
             background-color: var(--bg-dark);
             color: var(--text-light);
             font-family: 'Noto Serif SC', 'EB Garamond', serif;
-            margin: 0; padding: 0 20px 40px 20px;
+            margin: 0; padding: 0 15px 40px 15px;
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
             position: relative;
@@ -47,7 +47,6 @@
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            /* 替换为你指定的新背景图片 */
             background-image: url('https://i.ibb.co/bRsnhRWh/guillem-h-pongiluppi-wings-in-the-night-act3-esc1-2.jpg');
             background-size: cover;
             background-position: center;
@@ -61,16 +60,18 @@
             color: var(--hb-gold);
             letter-spacing: 4px;
             text-shadow: 0 0 15px rgba(255, 183, 3, 0.4);
-            margin: 25px 0 15px 0;
+            margin: 25px 0 10px 0;
             animation: pulseGlow 4s infinite ease-in-out;
             text-align: center;
+            font-size: 2.2em;
         }
         .subtitle {
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: var(--hb-steel);
             letter-spacing: 2px;
             margin-bottom: 20px;
             text-transform: uppercase;
+            text-align: center;
         }
 
         /* --- 悬浮控制面板 --- */
@@ -82,8 +83,8 @@
             max-width: 1100px;
             background: rgba(11, 9, 10, 0.95);
             backdrop-filter: blur(8px);
-            padding: 15px 10px;
-            margin-bottom: 20px;
+            padding: 12px 10px;
+            margin-bottom: 15px;
             border-bottom: 2px solid var(--hb-dark-red);
             box-shadow: 0 10px 30px rgba(0,0,0,0.9);
             display: flex;
@@ -92,11 +93,11 @@
             border-radius: 0 0 8px 8px;
         }
 
-        #status { font-size: 0.85em; color: var(--hb-gold); margin-bottom: 12px; height: 1.2em; text-shadow: 1px 1px 2px #000; animation: statusPulse 2s infinite; }
+        #status { font-size: 0.85em; color: var(--hb-gold); margin-bottom: 10px; min-height: 1.2em; text-shadow: 1px 1px 2px #000; animation: statusPulse 2s infinite; text-align: center; }
 
         .controls { 
             display: flex; 
-            gap: 12px; 
+            gap: 10px; 
             flex-wrap: wrap; 
             justify-content: center; 
             align-items: center; 
@@ -104,10 +105,10 @@
 
         .btn {
             background: rgba(20, 20, 20, 0.8); color: var(--hb-steel); border: 1px solid var(--border-steel);
-            padding: 8px 18px; cursor: pointer; font-family: 'Noto Serif SC', serif; font-size: 0.85em;
-            transition: all 0.3s; box-shadow: 0 0 5px rgba(0,0,0,0.5);
-            height: 36px; display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 4px;
+            padding: 7px 16px; cursor: pointer; font-family: 'Noto Serif SC', serif; font-size: 0.85em;
+            transition: all 0.25s ease; box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            height: 34px; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 4px; user-select: none;
         }
         .btn:hover { background: var(--hb-steel); color: #000; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(173, 181, 189, 0.3); }
         
@@ -115,92 +116,111 @@
         .btn-sync:hover { background: var(--hb-gold); color: #000; box-shadow: 0 0 15px var(--hb-gold); }
         
         .btn-unsaved {
-            background: rgba(120, 0, 0, 0.8) !important;
+            background: rgba(120, 0, 0, 0.85) !important;
             border-color: var(--hb-red) !important;
             color: #fff !important;
             animation: urgentPulse 2s infinite ease-in-out !important;
         }
 
-        .admin-controls { display: none; gap: 12px; align-items: center; }
+        .admin-controls { display: none; gap: 10px; align-items: center; }
         body.editing-active .admin-controls { display: flex; flex-wrap: wrap; justify-content: center; }
         
-        .separator { width: 1px; height: 25px; background: rgba(255,255,255,0.1); margin: 0 5px; }
+        .separator { width: 1px; height: 22px; background: rgba(255,255,255,0.15); margin: 0 4px; }
 
-        .btn-toggle-edit { border-color: #555; color: #777; }
-        body.editing-active .btn-toggle-edit { border-color: var(--hb-red); color: var(--hb-red); background: rgba(193, 18, 31, 0.1); }
+        .btn-toggle-edit { border-color: #555; color: #888; }
+        body.editing-active .btn-toggle-edit { border-color: var(--hb-red); color: var(--hb-red); background: rgba(193, 18, 31, 0.12); }
 
-        /* 表格样式 */
+        /* 表格容器：增加 overflow-x 保证手机端可正常横向滚动 */
         .table-container {
             width: 100%; max-width: 1100px;
-            background: rgba(15, 15, 15, 0.85); 
+            background: rgba(15, 15, 15, 0.9); 
             border: 1px solid var(--border-steel);
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
             border-radius: 6px;
-            margin-top: 10px;
+            margin-top: 5px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; min-width: 760px; border-collapse: collapse; }
         thead { 
             background: var(--hb-dark-red); 
             font-family: 'Cinzel', 'Noto Serif SC', serif; 
             font-size: 0.95em; 
-            position: sticky; 
-            top: 74px; 
-            z-index: 10; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         } 
-        th { padding: 12px; color: #fff; text-align: left; border-bottom: 2px solid var(--hb-red); letter-spacing: 1px; }
+        th { padding: 12px 14px; color: #fff; text-align: left; border-bottom: 2px solid var(--hb-red); letter-spacing: 1px; }
         
-        tr { animation: fadeIn 0.4s ease-out forwards; }
+        tr { animation: fadeIn 0.3s ease-out forwards; }
         tr:nth-child(even) { background: rgba(255,255,255,0.02); }
         tr:hover { background: rgba(193, 18, 31, 0.08); }
-        td { padding: 12px; border-bottom: 1px solid rgba(73, 80, 87, 0.3); font-size: 0.95em; color: var(--text-light); }
+        td { padding: 12px 14px; border-bottom: 1px solid rgba(73, 80, 87, 0.3); font-size: 0.95em; color: var(--text-light); vertical-align: middle; }
         
-        .name-cell { font-family: 'Cinzel', 'Noto Serif SC', serif; color: #fff !important; font-weight: bold; letter-spacing: 1px;}
-        .role-cell { color: var(--hb-steel) !important; font-style: italic; }
-        .goal-cell { color: var(--hb-gold) !important; }
+        .name-cell { 
+            font-family: 'Cinzel', 'Noto Serif SC', serif; 
+            color: #fff !important; 
+            font-weight: bold; 
+            letter-spacing: 1px;
+            word-break: break-word;
+        }
+        .role-cell { color: var(--hb-steel) !important; font-style: italic; word-break: break-word; }
+        .note-cell { line-height: 1.5; word-break: break-word; }
 
-        body.editing-active [contenteditable="true"]:focus { outline: none; border-bottom: 1px solid var(--hb-red); background: rgba(193, 18, 31, 0.05); }
+        body.editing-active [contenteditable="true"] {
+            cursor: text;
+            border-radius: 2px;
+            padding: 4px 6px;
+            transition: background 0.2s;
+        }
+        body.editing-active [contenteditable="true"]:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        body.editing-active [contenteditable="true"]:focus { 
+            outline: none; 
+            border-bottom: 1px solid var(--hb-red); 
+            background: rgba(193, 18, 31, 0.08); 
+        }
 
         .action-col { display: none; }
         body.editing-active .action-col { display: table-cell; }
 
+        .portrait-cell { text-align: center; }
         .portrait-cell img {
             width: 55px; height: 55px; object-fit: cover;
             border: 2px solid var(--border-steel); cursor: zoom-in;
-            background: #000; transition: transform 0.3s;
-            border-radius: 4px;
+            background: #000; transition: transform 0.25s, border-color 0.25s;
+            border-radius: 4px; display: block; margin: 0 auto;
         }
-        .portrait-cell img:hover { transform: scale(1.2); border-color: var(--hb-red); z-index: 20; position: relative; }
+        .portrait-cell img:hover { transform: scale(1.15); border-color: var(--hb-red); z-index: 20; position: relative; }
 
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; width: 80px; }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 80px; }
         .action-btn {
-            background: rgba(30, 30, 30, 0.6); border: 1px solid var(--border-steel); color: var(--hb-steel);
+            background: rgba(30, 30, 30, 0.7); border: 1px solid var(--border-steel); color: var(--hb-steel);
             height: 24px; font-size: 11px; cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 2px;
+            transition: 0.2s;
         }
         .action-btn:hover { background: var(--hb-steel); color: #000; }
         .btn-danger:hover { background: var(--hb-red); color: #fff; border-color: var(--hb-red); }
 
-        /* 模态框 */
+        /* 模态框统一样式 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
-            backdrop-filter: blur(6px);
+            background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
         }
-        #zoomModal img { max-width: 80%; max-height: 80%; border: 3px solid var(--hb-red); border-radius: 8px; box-shadow: 0 0 30px rgba(193, 18, 31, 0.5); }
+        #zoomModal img { max-width: 85%; max-height: 85%; border: 3px solid var(--hb-red); border-radius: 8px; box-shadow: 0 0 35px rgba(193, 18, 31, 0.6); }
         
-        .upload-panel { background: var(--bg-dark); border: 2px solid var(--hb-dark-red); padding: 30px; width: 400px; text-align: center; border-radius: 8px; }
-        .upload-area { border: 1px dashed var(--hb-steel); padding: 20px; margin: 15px 0; color: var(--hb-steel); cursor: pointer; transition: 0.3s; }
+        .upload-panel { background: var(--bg-dark); border: 2px solid var(--hb-dark-red); padding: 25px; width: 420px; max-width: 90vw; text-align: center; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.9); }
+        .upload-area { border: 1px dashed var(--hb-steel); padding: 20px; margin: 15px 0; color: var(--hb-steel); cursor: pointer; transition: 0.3s; border-radius: 4px; }
         .upload-area:hover { border-color: var(--hb-red); color: var(--hb-red); background: rgba(193, 18, 31, 0.05); }
-        .url-input { width: 90%; padding: 8px; background: #111; border: 1px solid var(--border-steel); color: #fff; margin-bottom: 10px; font-family: inherit;}
+        .url-input { width: 100%; padding: 8px 12px; background: #111; border: 1px solid var(--border-steel); color: #fff; margin-bottom: 15px; font-family: inherit; border-radius: 4px; }
         .url-input:focus { outline: none; border-color: var(--hb-red); box-shadow: 0 0 8px rgba(193, 18, 31, 0.5); }
 
-        /* 名词记录弹窗专有样式 */
-        .noun-panel { width: 600px; max-width: 90vw; }
+        .noun-panel { width: 620px; max-width: 90vw; }
         .noun-textarea {
-            width: 100%; height: 350px; background: #111; color: var(--text-light);
+            width: 100%; height: 320px; background: #111; color: var(--text-light);
             border: 1px solid var(--border-steel); padding: 12px; font-family: 'Noto Serif SC', serif;
-            font-size: 1.05em; line-height: 1.6; resize: none; margin-bottom: 15px; border-radius: 4px;
+            font-size: 1em; line-height: 1.6; resize: none; margin-bottom: 15px; border-radius: 4px;
         }
         .noun-textarea:focus { outline: none; border-color: var(--hb-red); }
     </style>
@@ -211,7 +231,7 @@
     <div class="subtitle">依斯嘉 · 破狱者联盟战地情报录</div>
 
     <!-- 悬浮控制栏 -->
-    <div class="sticky-header">
+    <div class="sticky-header" id="stickyHeader">
         <div id="status">潜伏于阴影，警惕切利亚斯的鹰犬...</div>
 
         <div class="controls">
@@ -235,30 +255,28 @@
         <table>
             <thead>
                 <tr>
-                    <th width="70">画像</th>
-                    <th width="140">姓名</th>
-                    <th width="160">身份</th>
-                    <th width="200">目的</th>
+                    <th style="width: 80px; text-align: center;">画像</th>
+                    <th style="width: 220px;">姓名</th>
+                    <th style="width: 200px;">身份</th>
                     <th>情报备注</th>
-                    <th width="100" class="action-col">操作</th>
+                    <th style="width: 90px;" class="action-col">操作</th>
                 </tr>
             </thead>
             <tbody id="npcBody"></tbody>
         </table>
     </div>
-    <div id="bottom-anchor"></div>
 
     <!-- 缩放模态框 -->
-    <div id="zoomModal" class="modal-overlay" onclick="this.style.display='none'">
-        <img id="modalImg" src="">
+    <div id="zoomModal" class="modal-overlay" onclick="closeModalOnOverlay(event, this)">
+        <img id="modalImg" src="" alt="画像预览">
     </div>
 
     <!-- 上传模态框 -->
-    <div id="uploadModal" class="modal-overlay">
+    <div id="uploadModal" class="modal-overlay" onclick="closeModalOnOverlay(event, this)">
         <div class="upload-panel">
-            <h3 style="color:var(--hb-gold); font-family:'Cinzel', serif;">附加目标画像</h3>
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">点击选择文件，或直接在此按 Ctrl+V 粘贴</div>
-            <input type="text" id="urlInput" class="url-input" placeholder="输入外部画像链接 (URL)，或直接 Ctrl+V...">
+            <h3 style="color:var(--hb-gold); font-family:'Cinzel', serif; margin-top:0;">附加目标画像</h3>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">点击选择文件，或在此直接按 Ctrl+V 粘贴截图</div>
+            <input type="text" id="urlInput" class="url-input" placeholder="输入外部画像图片链接 (URL)...">
             <div style="display:flex; justify-content: center; gap:10px;">
                 <button class="btn" style="border-color:var(--hb-red); color:var(--hb-red);" onclick="submitUrl()">确认附加</button>
                 <button class="btn" style="border-color:#555; color:#777;" onclick="closeUploadModal()">取消</button>
@@ -267,9 +285,9 @@
     </div>
 
     <!-- 名词记录模态框 -->
-    <div id="nounModal" class="modal-overlay">
+    <div id="nounModal" class="modal-overlay" onclick="closeModalOnOverlay(event, this)">
         <div class="upload-panel noun-panel">
-            <h3 style="color:var(--hb-gold); font-family:'Cinzel', serif;">依斯嘉/切利亚斯 战地术语表</h3>
+            <h3 style="color:var(--hb-gold); font-family:'Cinzel', serif; margin-top:0;">依斯嘉/切利亚斯 战地术语表</h3>
             <textarea id="nounTextarea" class="noun-textarea" placeholder="在此记录切利亚斯军方黑话、安全屋坐标、或依斯嘉地名设定..."></textarea>
             <div style="display:flex; justify-content: center; gap:10px;">
                 <button class="btn" style="border-color:var(--hb-red); color:var(--hb-red);" onclick="saveNounRecords()">更新记录</button>
@@ -281,52 +299,72 @@
     <input type="file" id="fileInput" style="display:none" accept="image/*">
 
     <script>
-        // ======= 破狱者联盟 API 密钥配置 =======
+        // ======= 破狱者联盟 API 配置 =======
         const BIN_ID = '6a0575ad250b1311c34a91e5';
         const API_KEY = '$2a$10$y8zzhvJgc6dFJB7rYbhP1eSAH4yZyI6hjqJheCSwTXr/NvJbtVIsC';
         const IMG_BB_KEY = '192ec7a9ecdec9b51ffed683da3842dc'; 
         const ACCESS_PASSWORD = '781674'; 
-        // =======================================
+        // 兜底默认占位图（内嵌 SVG，完全断网可用，不会触发死循环）
+        const FALLBACK_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 55 55'%3E%3Crect width='55' height='55' fill='%231a1a1a'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23555' font-size='22'%3E%3F%3C/text%3E%3C/svg%3E";
+        // ====================================
 
         let npcData = [];
         let nounRecords = ""; 
         let isEditMode = false;
         let hasUnsavedChanges = false;
         let currentEditingIndex = -1;
+        let statusTimeout = null;
 
         window.onload = loadFromCloud;
 
-        // 全局粘贴事件监听优化
+        // 安全转义函数，杜绝 XSS 与特殊字符破坏页面
+        function escapeHtml(str) {
+            if (!str) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // 点击遮罩灰色背景直接关闭
+        function closeModalOnOverlay(e, modalElement) {
+            if (e.target === modalElement) {
+                modalElement.style.display = 'none';
+            }
+        }
+
+        // 全局粘贴事件监听
         document.addEventListener('paste', function(e) {
-            // 1. 如果正在编辑表格内文字，仅允许粘贴纯文本
             if (e.target.getAttribute('contenteditable')) {
                 e.preventDefault();
-                const text = (e.originalEvent || e).clipboardData.getData('text/plain');
-                document.execCommand('insertText', false, text);
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                // 兼容性插入纯文本方式
+                const selection = window.getSelection();
+                if (!selection.rangeCount) return;
+                selection.deleteFromDocument();
+                selection.getRangeAt(0).insertNode(document.createTextNode(text));
+                selection.collapseToEnd();
                 return;
             }
 
-            // 2. 如果当前打开了“换图”弹窗，接管粘贴行为
             if (document.getElementById('uploadModal').style.display === 'flex') {
                 const clipboardData = e.clipboardData || e.originalEvent.clipboardData;
-                
-                // 优先检测是否粘贴了图片文件（如直接截图粘贴）
-                if (clipboardData.items) {
+                if (clipboardData && clipboardData.items) {
                     for (let item of clipboardData.items) {
                         if (item.type.indexOf("image") !== -1) {
-                            e.preventDefault(); // 阻止默认粘贴到input中
+                            e.preventDefault();
                             uploadFile(item.getAsFile());
-                            return; // 图片处理中，直接返回
+                            return;
                         }
                     }
                 }
-                
-                // 如果没有图片文件，检测是否粘贴了文本（如图片URL）
                 const pastedText = clipboardData.getData('text/plain');
                 if (pastedText && /^https?:\/\//i.test(pastedText.trim())) {
                     e.preventDefault();
                     document.getElementById('urlInput').value = pastedText.trim();
-                    submitUrl(); // 识别到链接，无需点击自动提交更换
+                    submitUrl();
                 }
             }
         });
@@ -363,6 +401,7 @@
                 isEditMode = false;
                 document.body.classList.remove('editing-active');
                 document.getElementById('editToggleBtn').innerHTML = "✎ 撰写情报";
+                showStatus("已恢复查阅模式。");
             }
             renderTable();
         }
@@ -373,20 +412,23 @@
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': API_KEY, 'X-Bin-Meta': false }
                 });
+                if (!res.ok) throw new Error("Network response was not ok");
                 const data = await res.json();
                 
                 if (data.npcs) {
                     npcData = data.npcs;
                     nounRecords = data.nouns || "";
                 } else {
-                    npcData = data;
+                    npcData = Array.isArray(data) ? data : [];
                     nounRecords = "";
                 }
                 
                 renderTable();
                 setUnsavedState(false);
-                showStatus("情报同步完毕。为了依斯嘉的自由！");
-            } catch (err) { showStatus("通讯被切断，同步失败。"); }
+                showStatus("情报同步完毕。为了依斯嘉的自由！", 4000);
+            } catch (err) { 
+                showStatus("通讯被切断，同步失败。"); 
+            }
         }
 
         async function saveToCloud() {
@@ -396,35 +438,44 @@
             const payload = { npcs: npcData, nouns: nounRecords };
 
             try {
-                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
                     body: JSON.stringify(payload)
                 });
+                if (!res.ok) throw new Error("Save error");
                 setUnsavedState(false);
-                showStatus("情报已安全转移入库。");
-            } catch (err) { showStatus("传输被拦截，封存失败。"); }
+                showStatus("情报已安全转移入库。", 4000);
+            } catch (err) { 
+                showStatus("传输被拦截，封存失败。"); 
+            }
         }
 
         function renderTable() {
             const tbody = document.getElementById("npcBody");
             tbody.innerHTML = '';
-            const editableAttr = isEditMode ? 'contenteditable="true"' : '';
+            const editableAttr = isEditMode ? 'contenteditable="true" spellcheck="false"' : '';
 
             npcData.forEach((item, index) => {
                 const row = document.createElement('tr');
+                const safeImg = escapeHtml(item.img) || FALLBACK_AVATAR;
+                const safeName = escapeHtml(item.name);
+                const safeRole = escapeHtml(item.role);
+                const safeNote = escapeHtml(item.note);
+
                 row.innerHTML = `
-                    <td class="portrait-cell"><img src="${item.img}" onerror="this.src='https://via.placeholder.com/55?text=?'" onclick="zoomImg(this.src)"></td>
-                    <td ${editableAttr} class="name-cell" onblur="updateData(${index}, 'name', this.innerText)">${item.name}</td>
-                    <td ${editableAttr} class="role-cell" onblur="updateData(${index}, 'role', this.innerText)">${item.role}</td>
-                    <td ${editableAttr} class="goal-cell" onblur="updateData(${index}, 'goal', this.innerText)">${item.goal}</td>
-                    <td ${editableAttr} onblur="updateData(${index}, 'note', this.innerText)">${item.note}</td>
+                    <td class="portrait-cell">
+                        <img src="${safeImg}" onerror="this.onerror=null;this.src='${FALLBACK_AVATAR}';" onclick="zoomImg(this.src)">
+                    </td>
+                    <td ${editableAttr} class="name-cell" onblur="updateData(${index}, 'name', this.innerText)">${safeName}</td>
+                    <td ${editableAttr} class="role-cell" onblur="updateData(${index}, 'role', this.innerText)">${safeRole}</td>
+                    <td ${editableAttr} class="note-cell" onblur="updateData(${index}, 'note', this.innerText)">${safeNote}</td>
                     <td class="action-col">
                         <div class="action-grid">
-                            <button class="action-btn" onclick="moveRow(${index}, -1)">▲</button>
-                            <button class="action-btn" onclick="moveRow(${index}, 1)">▼</button>
+                            <button class="action-btn" title="上移" onclick="moveRow(${index}, -1)">▲</button>
+                            <button class="action-btn" title="下移" onclick="moveRow(${index}, 1)">▼</button>
                             <button class="action-btn" onclick="openUploadModal(${index})">换图</button>
-                            <button class="action-btn btn-danger" onclick="deleteRow(${index})">☠</button>
+                            <button class="action-btn btn-danger" title="抹除" onclick="deleteRow(${index})">☠</button>
                         </div>
                     </td>
                 `;
@@ -433,8 +484,9 @@
         }
 
         function updateData(index, field, value) {
-            if (npcData[index][field] !== value.trim()) {
-                npcData[index][field] = value.trim();
+            const cleanValue = value.trim();
+            if (npcData[index][field] !== cleanValue) {
+                npcData[index][field] = cleanValue;
                 setUnsavedState(true);
             }
         }
@@ -444,7 +496,6 @@
                 img: 'https://i.ibb.co/mFr8QwJm/image.png', 
                 name: '未知目标', 
                 role: '未知', 
-                goal: '未知', /* 修复了这里的“位置”错误 */
                 note: '缺乏有效情报。'
             });
             renderTable();
@@ -453,7 +504,11 @@
         }
 
         function deleteRow(index) {
-            if(confirm("确定抹除该目标的所有档案吗？")) { npcData.splice(index, 1); renderTable(); setUnsavedState(true); }
+            if(confirm(`确定抹除「${npcData[index].name || '该目标'}」的所有档案吗？`)) { 
+                npcData.splice(index, 1); 
+                renderTable(); 
+                setUnsavedState(true); 
+            }
         }
 
         function moveRow(index, direction) {
@@ -467,9 +522,9 @@
 
         function openUploadModal(index) {
             currentEditingIndex = index;
-            document.getElementById('urlInput').value = ''; // 清空上一次的输入
+            document.getElementById('urlInput').value = '';
+            document.getElementById('fileInput').value = ''; // 解决重复选择同一张图片不触发的问题
             document.getElementById('uploadModal').style.display = 'flex';
-            // 打开弹窗后自动让输入框获取焦点，方便直接Ctrl+V
             setTimeout(() => document.getElementById('urlInput').focus(), 100);
         }
         
@@ -506,12 +561,11 @@
                         ctx.drawImage(img, 0, 0);
                         canvas.toBlob((blob) => {
                             if (blob) {
-                                const processedFile = new File([blob], "upload.webp", { type: "image/webp" });
-                                resolve(processedFile);
+                                resolve(new File([blob], "upload.webp", { type: "image/webp" }));
                             } else {
                                 reject(new Error("Canvas conversion failed"));
                             }
-                        }, 'image/webp', 0.8);
+                        }, 'image/webp', 0.82);
                     };
                     img.onerror = reject;
                 };
@@ -534,7 +588,9 @@
                     npcData[currentEditingIndex].img = result.data.url;
                     renderTable();
                     setUnsavedState(true);
-                    showStatus("画像已附加完毕。");
+                    showStatus("画像已附加完毕。", 3500);
+                } else {
+                    throw new Error("Upload response not success");
                 }
             } catch (err) { 
                 console.error(err);
@@ -546,11 +602,18 @@
             const url = document.getElementById('urlInput').value.trim();
             if (url) {
                 npcData[currentEditingIndex].img = url;
-                renderTable(); setUnsavedState(true); closeUploadModal();
+                renderTable(); 
+                setUnsavedState(true); 
+                closeUploadModal();
+                showStatus("画像外链已更新。", 3000);
             }
         }
 
-        document.getElementById('fileInput').onchange = (e) => uploadFile(e.target.files[0]);
+        document.getElementById('fileInput').onchange = (e) => {
+            if (e.target.files && e.target.files[0]) {
+                uploadFile(e.target.files[0]);
+            }
+        };
 
         function zoomImg(src) {
             document.getElementById('modalImg').src = src;
@@ -575,16 +638,32 @@
                         npcData = data.npcs;
                         nounRecords = data.nouns || "";
                     } else {
-                        npcData = data;
+                        npcData = Array.isArray(data) ? data : [];
                         nounRecords = "";
                     }
-                    renderTable(); setUnsavedState(true); showStatus("本地卷宗已覆盖当前情报。");
-                } catch (err) { alert("卷宗格式损毁！"); }
+                    renderTable(); 
+                    setUnsavedState(true); 
+                    showStatus("本地卷宗已覆盖当前情报。", 4000);
+                } catch (err) { 
+                    alert("卷宗格式损毁！"); 
+                }
             };
-            reader.readAsText(input.files[0]);
+            if (input.files[0]) {
+                reader.readAsText(input.files[0]);
+                input.value = ''; // 允许重复导入同一份修改过的文件
+            }
         }
 
-        function showStatus(msg) { document.getElementById("status").innerText = msg; }
+        function showStatus(msg, autoResetDelay = 0) { 
+            const statusEl = document.getElementById("status");
+            statusEl.innerText = msg; 
+            if (statusTimeout) clearTimeout(statusTimeout);
+            if (autoResetDelay > 0) {
+                statusTimeout = setTimeout(() => {
+                    statusEl.innerText = "潜伏于阴影，警惕切利亚斯的鹰犬...";
+                }, autoResetDelay);
+            }
+        }
     </script>
 </body>
 </html>
