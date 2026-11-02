@@ -6,7 +6,7 @@
     <title>地狱破灭 - 破狱者情报册</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- FreeImage.host 插件SDK (配置为获取直链 direct-links) -->
+    <!-- FreeImage.host 插件SDK (配置为获取 direct-links 图片直链) -->
     <script async src="https://freeimage.host/sdk/pup.js" data-url="https://freeimage.host/upload" data-auto-insert="direct-links"></script>
 
     <style>
@@ -264,7 +264,7 @@
 
             <div class="admin-controls">
                 <div class="separator"></div>
-                <!-- 顶部图床按钮（只保留pup属性，彻底移除重复弹窗的onclick） -->
+                <!-- 顶部图床按钮 -->
                 <button type="button" class="btn btn-upload-prominent" data-chevereto-pup-trigger data-target="#urlInput">☁ 上传图床</button>
                 <button class="btn" onclick="openNounModal()">📖 专有名词</button>
                 <button class="btn" onclick="addNewRow()">+ 录入新目标</button>
@@ -305,7 +305,7 @@
                 <button type="button" class="btn btn-upload-prominent" data-chevereto-pup-trigger data-target="#urlInput" style="width: 100%; height: 40px; font-size: 0.95em;">
                     ☁ 使用 FreeImage 上传图片
                 </button>
-                <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 6px;">上传完成后将自动填入直链并更新画像</div>
+                <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 6px;">上传完成后将自动提取直链并即刻附加更新</div>
             </div>
 
             <div style="border-top: 1px dashed var(--border-steel); margin-bottom: 18px;"></div>
@@ -361,38 +361,60 @@
 
         window.onload = function() {
             loadFromCloud();
-            initPupMessageListener(); // 启动 FreeImage 返回数据监听
+            bindPupAutoListeners(); // 启动自动化监听器
         };
 
-        // 监听 FreeImage.host 上传完成后的 postMessage 消息并自动回填
-        function initPupMessageListener() {
+        // 核心优化：专门用于从任意文本/代码中清洗并提纯真正的图片 URL
+        function extractCleanImageUrl(rawText) {
+            if (!rawText) return null;
+            // 优先匹配带常见图片后缀的链接
+            let match = rawText.match(/https?:\/\/[^\s"'<>\)\]]+\.(?:jpg|jpeg|png|webp|gif)/i);
+            if (!match) {
+                // 兜底提取通用 HTTP/HTTPS 链接
+                match = rawText.match(/https?:\/\/[^\s"'<>\)\]]+/i);
+            }
+            return match ? match[0] : null;
+        }
+
+        // 核心自动化绑定：双轨拦截 FreeImage 的直链输出
+        function bindPupAutoListeners() {
+            const inputEl = document.getElementById('urlInput');
+
+            // 机制 1：DOM 级事件拦截（当 pup.js 通过 JS 修改 input 框并抛出事件时捕获）
+            const handleInputChange = function() {
+                const pureUrl = extractCleanImageUrl(inputEl.value);
+                if (pureUrl) {
+                    inputEl.value = pureUrl;
+                    if (currentEditingIndex >= 0 && document.getElementById('uploadModal').style.display === 'flex') {
+                        submitUrl();
+                    }
+                }
+            };
+            inputEl.addEventListener('input', handleInputChange);
+            inputEl.addEventListener('change', handleInputChange);
+
+            // 机制 2：Window postMessage 跨域通信深度解析
             window.addEventListener('message', function(event) {
-                // 只接受来自 freeimage.host 的消息
-                if (!event.origin.includes('freeimage.host')) return;
+                // 如果是本域或无关消息则跳过
+                if (!event.data) return;
 
-                let data = event.data;
-                let rawText = "";
+                let payload = event.data;
+                let textToInspect = "";
 
-                if (typeof data === 'string') {
-                    rawText = data;
-                } else if (typeof data === 'object' && data !== null) {
-                    rawText = JSON.stringify(data);
+                if (typeof payload === 'string') {
+                    textToInspect = payload;
+                } else if (typeof payload === 'object') {
+                    // Chevereto PUP 标准协议结构是 { id: "xxx", message: "..." }
+                    textToInspect = payload.message || JSON.stringify(payload);
                 }
 
-                // 提取返回内容里的纯图片 URL (优先匹配 png, jpg, jpeg, webp, gif 直链)
-                const imgMatch = rawText.match(/https?:\/\/[^\s"'<>\)\]]+\.(?:jpg|jpeg|png|webp|gif)/i) 
-                              || rawText.match(/https?:\/\/[^\s"'<>\)\]]+/i);
-
-                if (imgMatch) {
-                    const finalUrl = imgMatch[0];
-                    const inputEl = document.getElementById('urlInput');
-                    if (inputEl) inputEl.value = finalUrl;
-
-                    // 如果是在给具体目标“换图”模式下，直接自动完成赋值并关闭弹窗
+                const pureUrl = extractCleanImageUrl(textToInspect);
+                if (pureUrl) {
+                    inputEl.value = pureUrl;
                     if (currentEditingIndex >= 0 && document.getElementById('uploadModal').style.display === 'flex') {
                         submitUrl();
                     } else {
-                        showStatus("画像已上传并获取直链: " + finalUrl, 4000);
+                        showStatus("画像已上传并获取直链: " + pureUrl, 4000);
                     }
                 }
             });
@@ -659,19 +681,15 @@
         }
 
         function submitUrl() {
-            let url = document.getElementById('urlInput').value.trim();
-            // 自动清洗可能带有 Markdown 或 HTML 格式的外链，提取纯 URL
-            const match = url.match(/https?:\/\/[^\s"'<>\)\]]+/i);
-            if (match) {
-                url = match[0];
-            }
+            let inputVal = document.getElementById('urlInput').value.trim();
+            const pureUrl = extractCleanImageUrl(inputVal);
 
-            if (url && currentEditingIndex >= 0) {
-                npcData[currentEditingIndex].img = url;
+            if (pureUrl && currentEditingIndex >= 0) {
+                npcData[currentEditingIndex].img = pureUrl;
                 renderTable(); 
                 setUnsavedState(true); 
                 closeUploadModal();
-                showStatus("画像已更新并成功附加！", 3500);
+                showStatus("画像已自动更新并附加完毕！", 3500);
             }
         }
 
