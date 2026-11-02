@@ -264,8 +264,6 @@
 
             <div class="admin-controls">
                 <div class="separator"></div>
-                <!-- 顶部图床按钮 -->
-                <button type="button" class="btn btn-upload-prominent" data-chevereto-pup-trigger data-target="#urlInput">☁ 上传图床</button>
                 <button class="btn" onclick="openNounModal()">📖 专有名词</button>
                 <button class="btn" onclick="addNewRow()">+ 录入新目标</button>
                 <button class="btn btn-sync" id="save-btn" onclick="saveToCloud()">● 封存入库</button>
@@ -364,7 +362,7 @@
             bindPupAutoListeners(); // 启动自动化监听器
         };
 
-        // 核心优化：专门用于从任意文本/代码中清洗并提纯真正的图片 URL
+        // 专门用于从任意文本/代码中清洗并提纯真正的图片 URL
         function extractCleanImageUrl(rawText) {
             if (!rawText) return null;
             // 优先匹配带常见图片后缀的链接
@@ -376,7 +374,7 @@
             return match ? match[0] : null;
         }
 
-        // 核心自动化绑定：双轨拦截 FreeImage 的直链输出
+        // 双轨拦截 FreeImage 的直链输出
         function bindPupAutoListeners() {
             const inputEl = document.getElementById('urlInput');
 
@@ -395,7 +393,6 @@
 
             // 机制 2：Window postMessage 跨域通信深度解析
             window.addEventListener('message', function(event) {
-                // 如果是本域或无关消息则跳过
                 if (!event.data) return;
 
                 let payload = event.data;
@@ -404,7 +401,6 @@
                 if (typeof payload === 'string') {
                     textToInspect = payload;
                 } else if (typeof payload === 'object') {
-                    // Chevereto PUP 标准协议结构是 { id: "xxx", message: "..." }
                     textToInspect = payload.message || JSON.stringify(payload);
                 }
 
