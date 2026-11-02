@@ -303,7 +303,7 @@
         </div>
     </div>
 
-    <!-- 密码验证模态框 -->
+    <!-- 密码验证模态框 (替代明文 prompt，输入自动遮掩为圆点/星号) -->
     <div id="passwordModal" class="modal-overlay" onclick="closeModalOnOverlay(event, this)">
         <div class="upload-panel" style="width: 360px;">
             <h3 id="passwordModalTitle" style="color:var(--hb-gold); font-family:'Cinzel', serif; margin-top:0;">破狱者密语验证</h3>
@@ -322,9 +322,7 @@
         // ======= 破狱者联盟 API 配置 =======
         const BIN_ID = '6a0575ad250b1311c34a91e5';
         const API_KEY = '$2a$10$y8zzhvJgc6dFJB7rYbhP1eSAH4yZyI6hjqJheCSwTXr/NvJbtVIsC';
-        
-        // 升级为全球高速且国内直连顺畅的 Freeimage 接口，彻底告别 imgbb 宕机蓝图
-        const FREEIMAGE_KEY = '6d207e02198a847e52c0a88b1ad01551'; 
+        const IMG_BB_KEY = '192ec7a9ecdec9b51ffed683da3842dc'; 
         const ACCESS_PASSWORD = '781674'; 
         const FALLBACK_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 55 55'%3E%3Crect width='55' height='55' fill='%231a1a1a'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23555' font-size='22'%3E%3F%3C/text%3E%3C/svg%3E";
         // ====================================
@@ -453,7 +451,7 @@
         async function toggleEditMode() {
             if (!isEditMode) {
                 const inputPass = await askPassword("为防地狱骑士窃密，请输入反抗密语:");
-                if (inputPass === null) return;
+                if (inputPass === null) return; // 用户取消
 
                 if (inputPass === ACCESS_PASSWORD) {
                     isEditMode = true;
@@ -493,4 +491,248 @@
                 setUnsavedState(false);
                 showStatus("情报同步完毕。为了依斯嘉的自由！", 4000);
             } catch (err) { 
-                showStatus(
+                showStatus("通讯被切断，同步失败。"); 
+            }
+        }
+
+        async function saveToCloud() {
+            const inputPass = await askPassword("确认将机密情报封存入库？请输入密语确认:");
+            if (inputPass === null) return;
+            if (inputPass !== ACCESS_PASSWORD) {
+                alert("验证失败：无权封存！");
+                return;
+            }
+
+            showStatus("正在加密并传输数据...");
+            const payload = { npcs: npcData, nouns: nounRecords };
+
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Save error");
+                setUnsavedState(false);
+                showStatus("情报已安全转移入库。", 4000);
+            } catch (err) { 
+                showStatus("传输被拦截，封存失败。"); 
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("npcBody");
+            tbody.innerHTML = '';
+            const editableAttr = isEditMode ? 'contenteditable="true" spellcheck="false"' : '';
+
+            npcData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                const safeImg = escapeHtml(item.img) || FALLBACK_AVATAR;
+                const safeName = escapeHtml(item.name);
+                const safeRole = escapeHtml(item.role);
+                const safeNote = escapeHtml(item.note);
+
+                row.innerHTML = `
+                    <td class="portrait-cell">
+                        <img src="${safeImg}" onerror="this.onerror=null;this.src='${FALLBACK_AVATAR}';" onclick="zoomImg(this.src)">
+                    </td>
+                    <td ${editableAttr} class="name-cell" onblur="updateData(${index}, 'name', this.innerText)">${safeName}</td>
+                    <td ${editableAttr} class="role-cell" onblur="updateData(${index}, 'role', this.innerText)">${safeRole}</td>
+                    <td ${editableAttr} class="note-cell" onblur="updateData(${index}, 'note', this.innerText)">${safeNote}</td>
+                    <td class="action-col">
+                        <div class="action-grid">
+                            <button class="action-btn" title="上移" onclick="moveRow(${index}, -1)">▲</button>
+                            <button class="action-btn" title="下移" onclick="moveRow(${index}, 1)">▼</button>
+                            <button class="action-btn" onclick="openUploadModal(${index})">换图</button>
+                            <button class="action-btn btn-danger" title="抹除" onclick="deleteRow(${index})">☠</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateData(index, field, value) {
+            const cleanValue = value.trim();
+            if (npcData[index][field] !== cleanValue) {
+                npcData[index][field] = cleanValue;
+                setUnsavedState(true);
+            }
+        }
+
+        function addNewRow() {
+            npcData.push({
+                img: 'https://i.ibb.co/mFr8QwJm/image.png', 
+                name: '未知目标', 
+                role: '未知', 
+                note: '缺乏有效情报。'
+            });
+            renderTable();
+            setUnsavedState(true);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function deleteRow(index) {
+            if(confirm(`确定抹除「${npcData[index].name || '该目标'}」的所有档案吗？`)) { 
+                npcData.splice(index, 1); 
+                renderTable(); 
+                setUnsavedState(true); 
+            }
+        }
+
+        function moveRow(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < npcData.length) {
+                [npcData[index], npcData[newIndex]] = [npcData[newIndex], npcData[index]];
+                renderTable();
+                setUnsavedState(true);
+            }
+        }
+
+        function openUploadModal(index) {
+            currentEditingIndex = index;
+            document.getElementById('urlInput').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('urlInput').focus(), 100);
+        }
+        
+        function closeUploadModal() { document.getElementById('uploadModal').style.display = 'none'; }
+
+        function openNounModal() {
+            document.getElementById('nounTextarea').value = nounRecords;
+            document.getElementById('nounModal').style.display = 'flex';
+        }
+        function closeNounModal() {
+            document.getElementById('nounModal').style.display = 'none';
+        }
+        function saveNounRecords() {
+            const newValue = document.getElementById('nounTextarea').value;
+            if (nounRecords !== newValue) {
+                nounRecords = newValue;
+                setUnsavedState(true);
+            }
+            closeNounModal();
+        }
+
+        async function processImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                resolve(new File([blob], "upload.webp", { type: "image/webp" }));
+                            } else {
+                                reject(new Error("Canvas conversion failed"));
+                            }
+                        }, 'image/webp', 0.82);
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        async function uploadFile(file) {
+            if (!file) return;
+            showStatus("正在处理并隐匿画像(压缩中)...");
+            closeUploadModal();
+            try {
+                const processedFile = await processImage(file);
+                const formData = new FormData();
+                formData.append("image", processedFile);
+                
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMG_BB_KEY}`, { method: "POST", body: formData });
+                const result = await res.json();
+                if (result.success) {
+                    npcData[currentEditingIndex].img = result.data.url;
+                    renderTable();
+                    setUnsavedState(true);
+                    showStatus("画像已附加完毕。", 3500);
+                } else {
+                    throw new Error("Upload response not success");
+                }
+            } catch (err) { 
+                console.error(err);
+                showStatus("画像处理失败，可能遭到拦截。"); 
+            }
+        }
+
+        function submitUrl() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (url) {
+                npcData[currentEditingIndex].img = url;
+                renderTable(); 
+                setUnsavedState(true); 
+                closeUploadModal();
+                showStatus("画像外链已更新。", 3000);
+            }
+        }
+
+        document.getElementById('fileInput').onchange = (e) => {
+            if (e.target.files && e.target.files[0]) {
+                uploadFile(e.target.files[0]);
+            }
+        };
+
+        function zoomImg(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('zoomModal').style.display = 'flex';
+        }
+
+        function exportJSON() {
+            const payload = { npcs: npcData, nouns: nounRecords };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `Hellbreakers_Intel_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function importJSON(input) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.npcs) {
+                        npcData = data.npcs;
+                        nounRecords = data.nouns || "";
+                    } else {
+                        npcData = Array.isArray(data) ? data : [];
+                        nounRecords = "";
+                    }
+                    renderTable(); 
+                    setUnsavedState(true); 
+                    showStatus("本地卷宗已覆盖当前情报。", 4000);
+                } catch (err) { 
+                    alert("卷宗格式损毁！"); 
+                }
+            };
+            if (input.files[0]) {
+                reader.readAsText(input.files[0]);
+                input.value = '';
+            }
+        }
+
+        function showStatus(msg, autoResetDelay = 0) { 
+            const statusEl = document.getElementById("status");
+            statusEl.innerText = msg; 
+            if (statusTimeout) clearTimeout(statusTimeout);
+            if (autoResetDelay > 0) {
+                statusTimeout = setTimeout(() => {
+                    statusEl.innerText = "潜伏于阴影，警惕切利亚斯的鹰犬...";
+                }, autoResetDelay);
+            }
+        }
+    </script>
+</body>
+</html>
