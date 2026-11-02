@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>地狱破灭 - 破狱者情报册</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- FreeImage.host 插件SDK -->
+    <script async src="https://freeimage.host/sdk/pup.js" data-url="https://freeimage.host/upload" data-auto-insert="direct-links"></script>
+
     <style>
         :root {
             /* 破狱者主题配色：血红、钢铁、暗金 */
@@ -108,12 +112,27 @@
             padding: 7px 16px; cursor: pointer; font-family: 'Noto Serif SC', serif; font-size: 0.85em;
             transition: all 0.25s ease; box-shadow: 0 0 5px rgba(0,0,0,0.5);
             height: 34px; display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 4px; user-select: none;
+            border-radius: 4px; user-select: none; text-decoration: none;
         }
         .btn:hover { background: var(--hb-steel); color: #000; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(173, 181, 189, 0.3); }
         
         .btn-sync { border-color: var(--hb-gold); color: var(--hb-gold); }
         .btn-sync:hover { background: var(--hb-gold); color: #000; box-shadow: 0 0 15px var(--hb-gold); }
+
+        /* 醒目图床上传按钮样式：琥珀熔金渐变与发光高亮 */
+        .btn-upload-prominent {
+            background: linear-gradient(135deg, rgba(255, 183, 3, 0.2), rgba(247, 127, 0, 0.35)) !important;
+            border: 1px solid #ffb703 !important;
+            color: #ffd166 !important;
+            font-weight: bold;
+            box-shadow: 0 0 12px rgba(255, 183, 3, 0.35);
+        }
+        .btn-upload-prominent:hover {
+            background: #ffb703 !important;
+            color: #111 !important;
+            box-shadow: 0 0 20px rgba(255, 183, 3, 0.8), 0 2px 8px rgba(0,0,0,0.8);
+            transform: translateY(-2px);
+        }
         
         .btn-unsaved {
             background: rgba(120, 0, 0, 0.85) !important;
@@ -211,8 +230,6 @@
         #zoomModal img { max-width: 85%; max-height: 85%; border: 3px solid var(--hb-red); border-radius: 8px; box-shadow: 0 0 35px rgba(193, 18, 31, 0.6); }
         
         .upload-panel { background: var(--bg-dark); border: 2px solid var(--hb-dark-red); padding: 25px; width: 420px; max-width: 90vw; text-align: center; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.9); }
-        .upload-area { border: 1px dashed var(--hb-steel); padding: 20px; margin: 15px 0; color: var(--hb-steel); cursor: pointer; transition: 0.3s; border-radius: 4px; }
-        .upload-area:hover { border-color: var(--hb-red); color: var(--hb-red); background: rgba(193, 18, 31, 0.05); }
         .url-input { width: 100%; padding: 8px 12px; background: #111; border: 1px solid var(--border-steel); color: #fff; margin-bottom: 15px; font-family: inherit; border-radius: 4px; }
         .url-input:focus { outline: none; border-color: var(--hb-red); box-shadow: 0 0 8px rgba(193, 18, 31, 0.5); }
 
@@ -224,7 +241,6 @@
         }
         .noun-textarea:focus { outline: none; border-color: var(--hb-red); }
 
-        /* 密码输入框专用样式 */
         .password-input {
             text-align: center;
             letter-spacing: 4px;
@@ -248,6 +264,8 @@
 
             <div class="admin-controls">
                 <div class="separator"></div>
+                <!-- 顶部醒目的上传图床按钮 -->
+                <button class="btn btn-upload-prominent" data-chevereto-pup-trigger data-target="#urlInput" onclick="openFreeImageUploader()">☁ 上传图床</button>
                 <button class="btn" onclick="openNounModal()">📖 专有名词</button>
                 <button class="btn" onclick="addNewRow()">+ 录入新目标</button>
                 <button class="btn btn-sync" id="save-btn" onclick="saveToCloud()">● 封存入库</button>
@@ -278,11 +296,20 @@
         <img id="modalImg" src="" alt="画像预览">
     </div>
 
-    <!-- 上传模态框 -->
+    <!-- 换图模态框 (仅保留 FreeImage 上传与外部链接) -->
     <div id="uploadModal" class="modal-overlay" onclick="closeModalOnOverlay(event, this)">
         <div class="upload-panel">
-            <h3 style="color:var(--hb-gold); font-family:'Cinzel', serif; margin-top:0;">附加目标画像</h3>
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">点击选择文件，或在此直接按 Ctrl+V 粘贴截图</div>
+            <h3 style="color:var(--hb-gold); font-family:'Cinzel', serif; margin-top:0; margin-bottom: 20px;">更新目标画像</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-upload-prominent" data-chevereto-pup-trigger data-target="#urlInput" onclick="openFreeImageUploader()" style="width: 100%; height: 40px; font-size: 0.95em;">
+                    ☁ 使用 FreeImage 上传图片
+                </button>
+                <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 6px;">上传完成后将自动填入直链，或手动粘贴于下方</div>
+            </div>
+
+            <div style="border-top: 1px dashed var(--border-steel); margin-bottom: 18px;"></div>
+
             <input type="text" id="urlInput" class="url-input" placeholder="输入外部画像图片链接 (URL)...">
             <div style="display:flex; justify-content: center; gap:10px;">
                 <button class="btn" style="border-color:var(--hb-red); color:var(--hb-red);" onclick="submitUrl()">确认附加</button>
@@ -303,7 +330,7 @@
         </div>
     </div>
 
-    <!-- 密码验证模态框 (替代明文 prompt，输入自动遮掩为圆点/星号) -->
+    <!-- 密码验证模态框 -->
     <div id="passwordModal" class="modal-overlay" onclick="closeModalOnOverlay(event, this)">
         <div class="upload-panel" style="width: 360px;">
             <h3 id="passwordModalTitle" style="color:var(--hb-gold); font-family:'Cinzel', serif; margin-top:0;">破狱者密语验证</h3>
@@ -316,13 +343,10 @@
         </div>
     </div>
 
-    <input type="file" id="fileInput" style="display:none" accept="image/*">
-
     <script>
         // ======= 破狱者联盟 API 配置 =======
         const BIN_ID = '6a0575ad250b1311c34a91e5';
         const API_KEY = '$2a$10$y8zzhvJgc6dFJB7rYbhP1eSAH4yZyI6hjqJheCSwTXr/NvJbtVIsC';
-        const IMG_BB_KEY = '192ec7a9ecdec9b51ffed683da3842dc'; 
         const ACCESS_PASSWORD = '781674'; 
         const FALLBACK_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 55 55'%3E%3Crect width='55' height='55' fill='%231a1a1a'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23555' font-size='22'%3E%3F%3C/text%3E%3C/svg%3E";
         // ====================================
@@ -336,6 +360,18 @@
         let passwordResolver = null;
 
         window.onload = loadFromCloud;
+
+        // 唤起 FreeImage 弹窗（含独立窗口兜底）
+        function openFreeImageUploader() {
+            setTimeout(() => {
+                if (!document.querySelector('.chevereto-pup-modal, iframe[src*="freeimage.host"]')) {
+                    const w = 680, h = 650;
+                    const left = (window.screen.width - w) / 2;
+                    const top = (window.screen.height - h) / 2;
+                    window.open('https://freeimage.host/upload', 'FreeImageHostUpload', `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes`);
+                }
+            }, 300);
+        }
 
         // 安全转义函数
         function escapeHtml(str) {
@@ -359,7 +395,7 @@
             }
         }
 
-        // 自定义掩码密码输入弹窗
+        // 密码输入弹窗
         function askPassword(promptText = "请输入反抗密语:") {
             return new Promise((resolve) => {
                 passwordResolver = resolve;
@@ -397,7 +433,7 @@
             }
         }
 
-        // 全局粘贴监听
+        // 纯文本粘贴监听（防止富文本格式污染）
         document.addEventListener('paste', function(e) {
             if (e.target.getAttribute('contenteditable')) {
                 e.preventDefault();
@@ -407,26 +443,6 @@
                 selection.deleteFromDocument();
                 selection.getRangeAt(0).insertNode(document.createTextNode(text));
                 selection.collapseToEnd();
-                return;
-            }
-
-            if (document.getElementById('uploadModal').style.display === 'flex') {
-                const clipboardData = e.clipboardData || e.originalEvent.clipboardData;
-                if (clipboardData && clipboardData.items) {
-                    for (let item of clipboardData.items) {
-                        if (item.type.indexOf("image") !== -1) {
-                            e.preventDefault();
-                            uploadFile(item.getAsFile());
-                            return;
-                        }
-                    }
-                }
-                const pastedText = clipboardData.getData('text/plain');
-                if (pastedText && /^https?:\/\//i.test(pastedText.trim())) {
-                    e.preventDefault();
-                    document.getElementById('urlInput').value = pastedText.trim();
-                    submitUrl();
-                }
             }
         });
 
@@ -451,7 +467,7 @@
         async function toggleEditMode() {
             if (!isEditMode) {
                 const inputPass = await askPassword("为防地狱骑士窃密，请输入反抗密语:");
-                if (inputPass === null) return; // 用户取消
+                if (inputPass === null) return;
 
                 if (inputPass === ACCESS_PASSWORD) {
                     isEditMode = true;
@@ -592,7 +608,6 @@
         function openUploadModal(index) {
             currentEditingIndex = index;
             document.getElementById('urlInput').value = '';
-            document.getElementById('fileInput').value = '';
             document.getElementById('uploadModal').style.display = 'flex';
             setTimeout(() => document.getElementById('urlInput').focus(), 100);
         }
@@ -615,61 +630,15 @@
             closeNounModal();
         }
 
-        async function processImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        canvas.toBlob((blob) => {
-                            if (blob) {
-                                resolve(new File([blob], "upload.webp", { type: "image/webp" }));
-                            } else {
-                                reject(new Error("Canvas conversion failed"));
-                            }
-                        }, 'image/webp', 0.82);
-                    };
-                    img.onerror = reject;
-                };
-                reader.onerror = reject;
-            });
-        }
-
-        async function uploadFile(file) {
-            if (!file) return;
-            showStatus("正在处理并隐匿画像(压缩中)...");
-            closeUploadModal();
-            try {
-                const processedFile = await processImage(file);
-                const formData = new FormData();
-                formData.append("image", processedFile);
-                
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMG_BB_KEY}`, { method: "POST", body: formData });
-                const result = await res.json();
-                if (result.success) {
-                    npcData[currentEditingIndex].img = result.data.url;
-                    renderTable();
-                    setUnsavedState(true);
-                    showStatus("画像已附加完毕。", 3500);
-                } else {
-                    throw new Error("Upload response not success");
-                }
-            } catch (err) { 
-                console.error(err);
-                showStatus("画像处理失败，可能遭到拦截。"); 
-            }
-        }
-
         function submitUrl() {
-            const url = document.getElementById('urlInput').value.trim();
-            if (url) {
+            let url = document.getElementById('urlInput').value.trim();
+            // 自动提取输入内容中的有效图片 URL
+            const match = url.match(/https?:\/\/[^\s"'<>\)\]]+/i);
+            if (match) {
+                url = match[0];
+            }
+
+            if (url && currentEditingIndex >= 0) {
                 npcData[currentEditingIndex].img = url;
                 renderTable(); 
                 setUnsavedState(true); 
@@ -677,12 +646,6 @@
                 showStatus("画像外链已更新。", 3000);
             }
         }
-
-        document.getElementById('fileInput').onchange = (e) => {
-            if (e.target.files && e.target.files[0]) {
-                uploadFile(e.target.files[0]);
-            }
-        };
 
         function zoomImg(src) {
             document.getElementById('modalImg').src = src;
